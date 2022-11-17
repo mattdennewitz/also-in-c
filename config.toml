@@ -1,0 +1,10 @@
+[players]
+types = ["basic", "basic", "drone"]
+
+[performance]
+jitter = true
+scale = 'dorian'
+patterns = 40
+pattern_iterations_minimum = 4
+pattern_iterations_maximum = 12
+bpm = 120
