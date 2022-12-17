@@ -1,3 +1,4 @@
+import pprint
 from typing import List, Literal, Dict, Optional, Any
 
 import pydantic
@@ -6,9 +7,9 @@ from pydantic import Field
 
 
 class PlayerConfig(pydantic.BaseModel):
-    pattern_iterations_minimum: int
-    pattern_iterations_maximum: int
-    jitter: bool
+    pattern_iterations_minimum: Optional[int]
+    pattern_iterations_maximum: Optional[int]
+    jitter: Optional[bool]
 
 
 class PerformanceConfig(pydantic.BaseModel):
@@ -21,12 +22,12 @@ class PerformanceConfig(pydantic.BaseModel):
     player_specific_rules: Dict[str, PlayerConfig]
 
     def player_rules(self, key: Optional[str] = None) -> Dict[str, Any]:
-        performance_config = pydash.get(self, "base_rules", {})
+        performance_config = pydash.get(self, "base_player_rules", {})
         player_performance_config = pydash.get(self, f"player_specific_rules.{key}", {})
 
         # flatten to dicts from pydantic structures
-        performance_config = dict(performance_config)
-        player_performance_config = dict(player_performance_config)
+        performance_config = performance_config.dict(exclude_none=True)
+        player_performance_config = player_performance_config.dict(exclude_none=True)
 
         # merge player-specific performance rules with overall performance rules
         merged = pydash.merge(dict(), performance_config, player_performance_config)

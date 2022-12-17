@@ -50,7 +50,7 @@ def create_performance(config: Config) -> List:
     player_performances = []
 
     for performer in performers:
-        played = performer.perform(patterns, humanize=config.performance.jitter)
+        played = performer.perform(patterns)
         player_performances.append(played)
 
     return player_performances

@@ -30,7 +30,6 @@ def cli(context, config):
 def midi(context, output):
     # create patterns
     config: Config = context.obj["config"]
-    print(config)
     performance = create_performance(config)
 
     midi = render_performance(config, performance)

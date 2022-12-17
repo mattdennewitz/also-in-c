@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import math
 import random
-from typing import Type, List, Dict, Any
-
-import pydash
+from typing import Type, List, Dict
 
 from inc.config import Config
 from inc.models import Pattern, Note
@@ -43,17 +41,19 @@ class Player:
         """Customize the performance of a single pattern"""
 
         pattern = pattern.copy(deep=True)  # patterns should be immutable-ish
-        pattern = self.humanize(pattern)
+
+        if self.jitter:
+            pattern = self.humanize(pattern)
 
         return pattern
 
-    def perform(self, patterns: List[Pattern], humanize: bool = True) -> List[Pattern]:
+    def perform(self, patterns: List[Pattern]) -> List[Pattern]:
         interpreted_patterns: List[Pattern] = []
 
         # play each pattern by repeating it a number of times
         for pattern in patterns:
             for _ in range(self.repeat_count()):
-                interpreted = self.interpret(pattern, humanize)
+                interpreted = self.interpret(pattern)
                 interpreted_patterns.append(interpreted)
 
         return interpreted_patterns
@@ -135,4 +135,6 @@ def get_performer(
             f'Invalid player type: {key}. Options are: {"".join(player_map.keys())}'
         )
 
-    return player_type(**config.performance.player_rules(key))
+    rules = config.performance.player_rules(key)
+
+    return player_type(**rules)
