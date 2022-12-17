@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import math
 import random
-from typing import Type, Optional, List
+from typing import Type, List, Dict, Any
+
+import pydash
 
 from inc.config import Config
 from inc.models import Pattern, Note
@@ -12,10 +14,14 @@ class Player:
     """Plays the pattern as given"""
 
     def __init__(
-        self, pattern_iterations_minimum: int = 4, pattern_iterations_maximum: int = 12
+        self,
+        pattern_iterations_minimum: int,
+        pattern_iterations_maximum: int,
+        jitter: bool,
     ):
         self.pattern_iterations_minimum = pattern_iterations_minimum
         self.pattern_iterations_maximum = pattern_iterations_maximum
+        self.jitter = jitter
 
     def humanize(self, pattern: Pattern) -> Pattern:
         """Adds very slight random jitter to the end of each note"""
@@ -27,20 +33,24 @@ class Player:
         return pattern
 
     def repeat_count(self):
-        """Repeats a pattern a number of times"""
+        """Randomly determines the number of repetitions for certain pattern"""
 
         return random.randint(
             self.pattern_iterations_minimum, self.pattern_iterations_maximum
         )
 
     def interpret(self, pattern: Pattern, humanize: bool = True) -> Pattern:
+        """Customize the performance of a single pattern"""
+
         pattern = pattern.copy(deep=True)  # patterns should be immutable-ish
         pattern = self.humanize(pattern)
+
         return pattern
 
     def perform(self, patterns: List[Pattern], humanize: bool = True) -> List[Pattern]:
         interpreted_patterns: List[Pattern] = []
 
+        # play each pattern by repeating it a number of times
         for pattern in patterns:
             for _ in range(self.repeat_count()):
                 interpreted = self.interpret(pattern, humanize)
@@ -102,7 +112,9 @@ class DronePlayer(Player):
         return pattern
 
 
-player_map = {
+player_map: Dict[
+    str, Type[Player | DronePlayer | DropoutPlayer | EveryOtherNotePlayer]
+] = {
     "basic": Player,
     "drone": DronePlayer,
     "dropout": DropoutPlayer,
@@ -111,14 +123,16 @@ player_map = {
 
 
 def get_performer(
-    key: str, performer_kwargs: Optional[dict] = None
-) -> Type[Player | DronePlayer | DropoutPlayer | EveryOtherNotePlayer]:
+    key: str,
+    config: Config,
+) -> Player | DronePlayer | DropoutPlayer | EveryOtherNotePlayer:
     """Creates a performer"""
 
-    if player_type := player_map.get(key) is None:
-        raise KeyError(f'Player types are: {"".join(player_map.keys())}')
+    try:
+        player_type = player_map[key]
+    except KeyError:
+        raise KeyError(
+            f'Invalid player type: {key}. Options are: {"".join(player_map.keys())}'
+        )
 
-    if performer_kwargs:
-        return player_type(**performer_kwargs)
-
-    return player_type()
+    return player_type(**config.performance.player_rules(key))

@@ -1,12 +1,11 @@
 from typing import List
 
 import click
+import pydash
 import toml
 
 from inc.config import Config
-from inc.generation import generate_pattern, create_performance
-from inc.models import Pattern
-from inc.players import get_performer
+from inc.generation import create_performance, render_performance
 
 
 @click.group()
@@ -14,6 +13,14 @@ from inc.players import get_performer
 @click.pass_context
 def cli(context, config):
     parsed = toml.load(config)
+
+    parsed["performance"]["base_player_rules"] = parsed["performance"].pop(
+        "players", {}
+    )
+    parsed["performance"]["player_specific_rules"] = parsed["performance"].pop(
+        "player", {}
+    )
+
     context.obj["config"] = Config(**parsed)
 
 
@@ -23,6 +30,8 @@ def cli(context, config):
 def midi(context, output):
     # create patterns
     config: Config = context.obj["config"]
-    performance = create_performance(
-        pattern_count=config.performance.patterns, players=config.players.types
-    )
+    print(config)
+    performance = create_performance(config)
+
+    midi = render_performance(config, performance)
+    midi.writeFile(output)

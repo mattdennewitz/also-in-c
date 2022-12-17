@@ -1,6 +1,8 @@
 import random
 from typing import List
 
+from midiutil import MIDIFile
+
 from inc.config import Config
 from inc.models import Pattern, Note
 from inc.notes import NOTE_HALF, DOTTED, NOTE_WHOLE, NOTE_LENGTHS
@@ -35,13 +37,45 @@ def generate_pattern():
     return pattern
 
 
-def create_performance(pattern_count: int, player_types: List[str]):
+def create_performance(config: Config) -> List:
     # patterns to perform
-    patterns: List[Pattern] = [generate_pattern() for _ in range(pattern_count)]
+    patterns: List[Pattern] = [
+        generate_pattern() for _ in range(config.performance.patterns)
+    ]
 
     # performers to perform them
-    performers = [get_performer(key) for key in player_types]
+    performers = [get_performer(key, config) for key in config.performance.types]
 
     # each perform gives their interpretation of a pattern
+    player_performances = []
+
     for performer in performers:
-        played = performer.perform(patterns)
+        played = performer.perform(patterns, humanize=config.performance.jitter)
+        player_performances.append(played)
+
+    return player_performances
+
+
+def render_performance(config: Config, performance: List[List[Pattern]]) -> MIDIFile:
+    midi = MIDIFile(len(performance))
+    note: Note
+
+    for (track_number, patterns) in enumerate(performance):
+        midi.addTempo(track_number, 0, config.performance.bpm)
+        time_offset = 0
+
+        for pattern in patterns:
+            for note in pattern.notes:
+                if not note.is_rest:
+                    midi.addNote(
+                        track_number,
+                        0,
+                        note.midi_note,
+                        time_offset,
+                        note.length,
+                        note.random_velocity(),
+                    )
+
+                time_offset += note.length
+
+    return midi
