@@ -1,3 +1,4 @@
+import logging
 import random
 from typing import List
 
@@ -7,6 +8,9 @@ from inc.config import Config
 from inc.models import Pattern, Note
 from inc.notes import NOTE_HALF, DOTTED, NOTE_WHOLE, NOTE_LENGTHS
 from inc.players import get_performer, Player
+
+
+log = logging.getLogger("alsoinc.generation")
 
 
 def generate_pattern():
@@ -23,16 +27,24 @@ def generate_pattern():
         ]
     )
 
-    # randomly pack boxes full of notes
+    log.info("Generating pattern of %s width", width_remaining)
+
     while 1:
         note_length = random.choices(
             NOTE_LENGTHS, weights=[random.random() for _ in range(len(NOTE_LENGTHS))]
         )[0]
 
-        if len(pattern.notes) and (pattern.length() + note_length) > width_remaining:
-            break
+        # would adding this note exceed the remaining size?
+        would_exceed_max_length = (pattern.length() + note_length) > width_remaining
 
-        pattern.notes.append(Note.create(note_length))
+        if len(pattern.notes) and would_exceed_max_length:
+            break
+        elif not pattern.notes and would_exceed_max_length:
+            continue
+
+        note = Note.create(note_length)
+        pattern.notes.append(note)
+        log.debug("Added note %s", note)
 
     return pattern
 

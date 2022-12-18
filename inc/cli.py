@@ -1,11 +1,20 @@
-from typing import List
+import logging
 
 import click
-import pydash
 import toml
+from rich.logging import RichHandler
 
 from inc.config import Config
 from inc.generation import create_performance, render_performance
+
+
+logging.basicConfig(
+    level="DEBUG",
+    format="[%(module)s.%(funcName)s] %(message)s",
+    handlers=[RichHandler()],
+)
+
+log = logging.getLogger("alsoinc.cli")
 
 
 @click.group()
@@ -21,6 +30,8 @@ def cli(context, config):
         "player", {}
     )
 
+    log.info("Creating performance with configuration: %s", parsed)
+
     context.obj["config"] = Config(**parsed)
 
 
@@ -31,6 +42,8 @@ def midi(context, output):
     # create patterns
     config: Config = context.obj["config"]
     performance = create_performance(config)
+
+    log.info("Writing to %s", output.name)
 
     midi = render_performance(config, performance)
     midi.writeFile(output)

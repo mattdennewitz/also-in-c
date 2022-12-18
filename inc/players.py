@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import logging
 import math
 import random
 from typing import Type, List, Dict
 
 from inc.config import Config
 from inc.models import Pattern, Note
+
+
+log = logging.getLogger("alsoinc.players")
 
 
 class Player:
@@ -52,6 +56,9 @@ class Player:
 
         # play each pattern by repeating it a number of times
         for pattern in patterns:
+            repeats = self.repeat_count()
+            log.info("Player will play pattern %s time(s)", repeats)
+
             for _ in range(self.repeat_count()):
                 interpreted = self.interpret(pattern)
                 interpreted_patterns.append(interpreted)

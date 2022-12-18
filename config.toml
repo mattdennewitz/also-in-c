@@ -3,14 +3,14 @@ types = ["basic", "basic"]
 # performance scale
 scale = 'dorian'
 # how many patterns to generate
-patterns = 4
+patterns = 40
 # performance's tempo in bpm
 bpm = 120
 
 [performance.players]
 jitter = false
-pattern_iterations_minimum = 1
-pattern_iterations_maximum = 1
+pattern_iterations_minimum = 2
+pattern_iterations_maximum = 2
 
 [performance.player.basic]
-jitter = false
+jitter = true
