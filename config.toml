@@ -1,8 +1,8 @@
 [performance]
 # types: basic, drone, every_other, dropout
 types = ["basic", "basic", "drone"]
-# performance scale
-scale = 'dorian'
+# performance scales: dorian, major, minor
+scale = "dorian"
 # how many patterns to generate
 patterns = 40
 # performance's tempo in bpm
