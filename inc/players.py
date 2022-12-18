@@ -51,15 +51,17 @@ class Player:
 
         return pattern
 
-    def perform(self, patterns: List[Pattern]) -> List[Pattern]:
+    def perform(
+        self, patterns: List[Pattern], repeat_count: int = None
+    ) -> List[Pattern]:
         interpreted_patterns: List[Pattern] = []
 
         # play each pattern by repeating it a number of times
         for pattern in patterns:
-            repeats = self.repeat_count()
-            log.info("Player will play pattern %s time(s)", repeats)
+            repeat_count = repeat_count or self.repeat_count()
+            log.info("Player will play pattern %s time(s)", repeat_count)
 
-            for _ in range(self.repeat_count()):
+            for _ in range(repeat_count):
                 interpreted = self.interpret(pattern)
                 interpreted_patterns.append(interpreted)
 

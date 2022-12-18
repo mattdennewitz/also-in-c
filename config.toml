@@ -1,5 +1,6 @@
 [performance]
-types = ["basic", "basic"]
+# types: basic, drone, every_other, dropout
+types = ["basic", "basic", "drone"]
 # performance scale
 scale = 'dorian'
 # how many patterns to generate
@@ -9,8 +10,8 @@ bpm = 120
 
 [performance.players]
 jitter = false
-pattern_iterations_minimum = 2
-pattern_iterations_maximum = 2
+pattern_iterations_minimum = 4
+pattern_iterations_maximum = 12
 
 [performance.player.basic]
 jitter = true
