@@ -26,7 +26,11 @@ class PerformanceConfig(pydantic.BaseModel):
 
         # flatten to dicts from pydantic structures
         performance_config = performance_config.dict(exclude_none=True)
-        player_performance_config = player_performance_config.dict(exclude_none=True)
+
+        if not isinstance(player_performance_config, dict):
+            player_performance_config = player_performance_config.dict(
+                exclude_none=True
+            )
 
         # merge player-specific performance rules with overall performance rules
         merged = pydash.merge(dict(), performance_config, player_performance_config)
